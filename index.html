@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jenext Mobile - Phone Selling, Repair & Accessories</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg-primary: #080c12;
+    --bg-secondary: #0d1421;
+    --bg-card: #111827;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --text-primary: #f0f4ff;
+    --text-secondary: #8899bb;
+    --border: #1e2d47;
+    --glow: 0 0 20px rgba(0,212,255,0.3);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Exo 2', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none; z-index:1000; opacity:0.4;
+  }
+
+  /* NAVBAR */
+  nav {
+    position:fixed; top:0; width:100%; z-index:999;
+    background: rgba(8,12,18,0.85);
+    backdrop-filter: blur(16px); ba
+    border-bottom: 1px solid var(--border);
+    padding: 0 5%;
+    display:flex; align-items:center; justify-content:space-between;
+    height:68px;
+  }
+  .logo {
+    display:flex; align-items:center; gap:10px;
+    font-family:'Rajdhani',sans-serif; font-size:1.6rem; font-weight:700;
+    letter-spacing:2px; color:var(--text-primary);
+  }
+  .logo span { color:var(--accent); }
+  .logo-icon {
+    width:36px; height:36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.2rem;
+  }
+  .nav-links { display:flex; gap:32px; list-style:none; }
+  .nav-links a {
+    text-decoration:none; color:var(--text-secondary);
+    font-size:0.9rem; font-weight:500; letter-spacing:1px; text-transform:uppercase;
+    transition:color 0.3s;
+    position:relative;
+  }
+  .nav-links a::after {
+    content:''; position:absolute; bottom:-4px; left:0; width:0; height:2px;
+    background:var(--accent); transition:width 0.3s;
+  }
+  .nav-links a:hover { color:var(--accent); }
+  .nav-links a:hover::after { width:100%; }
+  .nav-cta {
+    background: linear-gradient(135deg, var(--accent), #0099cc);
+    color:#000 !important; padding:8px 20px; border-radius:6px;
+    font-weight:700 !important; letter-spacing:1px;
+  }
+  .nav-cta::after { display:none !important; }
+  .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; }
+  .hamburger span { width:24px; height:2px; background:var(--text-primary); border-radius:2px; }
+
+  /* HERO */
+  .hero {
+    min-height:100vh; display:flex; align-items:center;
+    position:relative; overflow:hidden;
+    padding: 100px 5% 60px;
+  }
+  .hero-bg {
+    position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse 60% 50% at 70% 50%, rgba(0,212,255,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(124,58,237,0.08) 0%, transparent 70%),
+      linear-gradient(180deg, #080c12 0%, #0d1421 100%);
+  }
+  .hero-grid {
+    position:absolute; inset:0;
+    background-image: linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+    background-size:60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+  }
+  .hero-content { position:relative; z-index:2; max-width:650px; }
+  .hero-badge {
+    display:inline-flex; align-items:center; gap:8px;
+    background: rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3);
+    padding:6px 16px; border-radius:100px; margin-bottom:24px;
+    font-size:0.8rem; color:var(--accent); letter-spacing:2px; text-transform:uppercase;
+    animation: fadeInDown 0.8s ease;
+  }
+  .hero-badge::before { content:''; width:6px; height:6px; background:var(--accent); border-radius:50%; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  @keyframes fadeInDown { from{opacity:0;transform:translateY(-20px);} to{opacity:1;transform:translateY(0);} }
+  @keyframes fadeInUp { from{opacity:0;transform:translateY(30px);} to{opacity:1;transform:translateY(0);} }
+  @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+  .hero h1 {
+    font-family:'Rajdhani',sans-serif;
+    font-size:clamp(2.8rem,6vw,5rem); font-weight:700;
+    line-height:1.1; letter-spacing:-1px; margin-bottom:20px;
+    animation: fadeInUp 0.8s ease 0.2s both;
+  }
+  .hero h1 .accent { color:var(--accent); }
+  .hero h1 .accent2 { color:var(--accent3); }
+  .hero p {
+    font-size:1.1rem; color:var(--text-secondary); line-height:1.7;
+    margin-bottom:36px; max-width:500px;
+    animation: fadeInUp 0.8s ease 0.4s both;
+  }
+  .hero-btns {
+    display:flex; gap:16px; flex-wrap:wrap;
+    animation: fadeInUp 0.8s ease 0.6s both;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #0099cc);
+    color:#000; padding:14px 32px; border-radius:8px;
+    font-weight:700; font-size:1rem; letter-spacing:1px;
+    text-decoration:none; border:none; cursor:pointer;
+    transition:transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 30px rgba(0,212,255,0.4);
+  }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow: 0 0 50px rgba(0,212,255,0.6); }
+  .btn-secondary {
+    background:transparent; color:var(--text-primary);
+    padding:14px 32px; border-radius:8px;
+    border:1px solid var(--border); font-weight:600;
+    font-size:1rem; letter-spacing:1px;
+    text-decoration:none; cursor:pointer;
+    transition:border-color 0.3s, color 0.3s;
+  }
+  .btn-secondary:hover { border-color:var(--accent); color:var(--accent); }
+
+  .hero-visual {
+    position:absolute; right:5%; top:50%; transform:translateY(-50%);
+    width:min(480px,45vw);
+    animation: fadeIn 1s ease 0.5s both;
+  }
+  .phone-mockup {
+    width:100%; aspect-ratio:0.5;
+    background: linear-gradient(145deg, #1a2540, #0d1421);
+    border-radius:40px;
+    border:2px solid rgba(0,212,255,0.2);
+    box-shadow: 0 0 80px rgba(0,212,255,0.15), 0 40px 80px rgba(0,0,0,0.6);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    position:relative; overflow:hidden;
+  }
+  .phone-mockup::before {
+    content:'';
+    position:absolute; inset:0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.1), transparent 60%);
+  }
+  .phone-screen-content { text-align:center; position:relative; z-index:2; }
+  .phone-icon { font-size:5rem; margin-bottom:16px; }
+  .phone-text { font-family:'Rajdhani',sans-serif; font-size:1.4rem; color:var(--accent); letter-spacing:2px; }
+  .floating-badge {
+    position:absolute;
+    background:var(--bg-card); border:1px solid var(--border);
+    padding:10px 16px; border-radius:12px;
+    font-size:0.8rem; white-space:nowrap;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    animation:float 3s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+  .fb1 { top:15%; left:-20%; animation-delay:0s; }
+  .fb2 { top:50%; right:-15%; animation-delay:1s; }
+  .fb3 { bottom:15%; left:-15%; animation-delay:2s; }
+  .fb-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
+
+  /* STATS */
+  .stats {
+    display:grid; grid-template-columns:repeat(4,1fr);
+    gap:1px; background:var(--border);
+    border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  }
+  .stat-item {
+    background:var(--bg-secondary); padding:32px 20px; text-align:center;
+  }
+  .stat-number {
+    font-family:'Rajdhani',sans-serif; font-size:2.5rem; font-weight:700;
+    color:var(--accent); line-height:1;
+  }
+  .stat-label { color:var(--text-secondary); font-size:0.85rem; margin-top:4px; letter-spacing:1px; }
+
+  /* SECTIONS */
+  section { padding:80px 5%; }
+  .section-header { text-align:center; margin-bottom:56px; }
+  .section-tag {
+    display:inline-block; padding:4px 16px;
+    border:1px solid rgba(0,212,255,0.3); border-radius:100px;
+    color:var(--accent); font-size:0.8rem; letter-spacing:2px; text-transform:uppercase;
+    margin-bottom:16px;
+  }
+  .section-title {
+    font-family:'Rajdhani',sans-serif; font-size:clamp(2rem,4vw,3rem);
+    font-weight:700; letter-spacing:-0.5px;
+  }
+  .section-title span { color:var(--accent); }
+  .section-sub { color:var(--text-secondary); margin-top:12px; max-width:500px; margin-inline:auto; line-height:1.6; }
+
+  /* SERVICES */
+  #services { background:var(--bg-secondary); }
+  .services-grid {
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr));
+    gap:20px;
+  }
+  .service-card {
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:16px; padding:28px;
+    transition:border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    cursor:default; position:relative; overflow:hidden;
+  }
+  .service-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg, var(--accent), var(--accent2));
+    transform:scaleX(0); transition:transform 0.3s; transform-origin:left;
+  }
+  .service-card:hover { border-color:rgba(0,212,255,0.3); transform:translateY(-4px); box-shadow:var(--glow); }
+  .service-card:hover::before { transform:scaleX(1); }
+  .service-icon {
+    width:52px; height:52px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.6rem; margin-bottom:16px;
+  }
+  .service-card h3 { font-family:'Rajdhani',sans-serif; font-size:1.2rem; font-weight:700; margin-bottom:8px; letter-spacing:0.5px; }
+  .service-card p { color:var(--text-secondary); font-size:0.9rem; line-height:1.6; }
+  .service-tag {
+    display:inline-block; margin-top:12px; padding:3px 10px;
+    border-radius:100px; font-size:0.75rem; font-weight:600;
+  }
+
+  /* PHONES SECTION */
+  #phones { background:var(--bg-primary); }
+  .phones-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px,1fr)); gap:24px; }
+  .phone-card {
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:16px; overflow:hidden;
+    transition:transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  }
+  .phone-card:hover { transform:translateY(-6px); box-shadow:var(--glow); border-color:rgba(0,212,255,0.3); }
+  .phone-card-img {
+    height:180px; background:linear-gradient(145deg, #1a2540, #0f1e33);
+    display:flex; align-items:center; justify-content:center;
+    font-size:4rem; position:relative; overflow:hidden;
+  }
+  .phone-card-img::after {
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.1), transparent 70%);
+  }
+  .phone-condition {
+    position:absolute; top:12px; right:12px; z-index:2;
+    padding:4px 12px; border-radius:100px; font-size:0.75rem; font-weight:700;
+  }
+  .new-badge { background:rgba(0,212,255,0.2); color:var(--accent); border:1px solid rgba(0,212,255,0.4); }
+  .used-badge { background:rgba(245,158,11,0.2); color:var(--accent3); border:1px solid rgba(245,158,11,0.4); }
+  .phone-card-body { padding:20px; }
+  .phone-card h3 { font-family:'Rajdhani',sans-serif; font-size:1.1rem; font-weight:700; margin-bottom:4px; }
+  .phone-card .brand { color:var(--text-secondary); font-size:0.85rem; margin-bottom:12px; }
+  .phone-card .price { font-family:'Rajdhani',sans-serif; font-size:1.4rem; font-weight:700; color:var(--accent); }
+  .phone-card .warranty { color:var(--text-secondary); font-size:0.8rem; margin-top:4px; }
+  .inquiry-btn {
+    display:block; text-align:center; margin-top:14px;
+    padding:8px; border-radius:8px;
+    background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3);
+    color:var(--accent); font-size:0.85rem; font-weight:600;
+    text-decoration:none; transition:background 0.3s;
+    cursor:pointer;
+  }
+  .inquiry-btn:hover { background:rgba(0,212,255,0.2); }
+
+  /* WHY US */
+  #why { background:var(--bg-secondary); }
+  .why-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:20px; }
+  .why-card {
+    text-align:center; padding:32px 20px;
+    background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
+    transition:border-color 0.3s, transform 0.3s;
+  }
+  .why-card:hover { border-color:rgba(0,212,255,0.3); transform:translateY(-4px); }
+  .why-icon { font-size:2.5rem; margin-bottom:16px; }
+  .why-card h3 { font-family:'Rajdhani',sans-serif; font-size:1.1rem; font-weight:700; margin-bottom:8px; }
+  .why-card p { color:var(--text-secondary); font-size:0.85rem; line-height:1.6; }
+
+  /* WARRANTY */
+  .warranty-banner {
+    background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(124,58,237,0.08));
+    border:1px solid rgba(0,212,255,0.2);
+    border-radius:20px; padding:40px;
+    display:flex; align-items:center; justify-content:space-between; gap:24px;
+    flex-wrap:wrap;
+  }
+  .warranty-text h2 { font-family:'Rajdhani',sans-serif; font-size:2rem; font-weight:700; margin-bottom:8px; }
+  .warranty-text h2 span { color:var(--accent); }
+  .warranty-text p { color:var(--text-secondary); max-width:500px; line-height:1.6; }
+  .warranty-items { display:flex; gap:20px; flex-wrap:wrap; }
+  .warranty-item {
+    text-align:center; padding:16px 24px;
+    background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.15);
+    border-radius:12px;
+  }
+  .warranty-item .w-months { font-family:'Rajdhani',sans-serif; font-size:2rem; font-weight:700; color:var(--accent); }
+  .warranty-item .w-label { font-size:0.8rem; color:var(--text-secondary); }
+
+  /* CONTACT */
+  #contact { background:var(--bg-primary); }
+  .contact-wrapper { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start; }
+  .contact-info h2 { font-family:'Rajdhani',sans-serif; font-size:2.4rem; font-weight:700; margin-bottom:16px; }
+  .contact-info h2 span { color:var(--accent); }
+  .contact-info p { color:var(--text-secondary); line-height:1.7; margin-bottom:32px; }
+  .contact-items { display:flex; flex-direction:column; gap:16px; }
+  .contact-item {
+    display:flex; align-items:center; gap:16px;
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:12px; padding:16px 20px;
+    transition:border-color 0.3s;
+  }
+  .contact-item:hover { border-color:rgba(0,212,255,0.3); }
+  .contact-item-icon {
+    width:44px; height:44px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; font-size:1.3rem;
+    flex-shrink:0;
+  }
+  .contact-item-text .label { font-size:0.75rem; color:var(--text-secondary); letter-spacing:1px; text-transform:uppercase; }
+  .contact-item-text .value { font-weight:600; margin-top:2px; font-size:1rem; }
+  .contact-item-text a { color:var(--text-primary); text-decoration:none; }
+  .contact-item-text a:hover { color:var(--accent); }
+
+  /* CONTACT FORM */
+  .contact-form {
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:20px; padding:36px;
+  }
+  .contact-form h3 { font-family:'Rajdhani',sans-serif; font-size:1.5rem; font-weight:700; margin-bottom:24px; }
+  .form-group { margin-bottom:18px; }
+  .form-group label { display:block; font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px; letter-spacing:0.5px; }
+  .form-group input, .form-group textarea, .form-group select {
+    width:100%; padding:12px 16px;
+    background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    border-radius:8px; color:var(--text-primary);
+    font-family:'Exo 2',sans-serif; font-size:0.95rem;
+    transition:border-color 0.3s, box-shadow 0.3s;
+    outline:none;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,212,255,0.1);
+  }
+  .form-group textarea { height:120px; resize:vertical; }
+  .form-group select option { background:var(--bg-card); }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .submit-btn {
+    width:100%; padding:14px;
+    background:linear-gradient(135deg, var(--accent), #0099cc);
+    color:#000; border:none; border-radius:8px;
+    font-family:'Exo 2',sans-serif; font-size:1rem; font-weight:700;
+    cursor:pointer; letter-spacing:1px;
+    transition:transform 0.2s, box-shadow 0.2s;
+    box-shadow:0 0 20px rgba(0,212,255,0.3);
+  }
+  .submit-btn:hover { transform:translateY(-2px); box-shadow:0 0 40px rgba(0,212,255,0.5); }
+
+  /* MAP */
+  .map-container {
+    margin-top:48px; border-radius:16px; overflow:hidden;
+    border:1px solid var(--border); height:300px;
+    background:var(--bg-card); display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  .map-placeholder {
+    text-align:center; color:var(--text-secondary);
+  }
+  .map-placeholder .map-icon { font-size:3rem; margin-bottom:12px; }
+  .map-placeholder p { font-size:0.95rem; }
+  .map-placeholder strong { color:var(--text-primary); display:block; margin-top:4px; }
+
+  /* FOOTER */
+  footer {
+    background:var(--bg-secondary);
+    border-top:1px solid var(--border);
+    padding:48px 5% 24px;
+  }
+  .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr; gap:48px; margin-bottom:48px; }
+  .footer-brand .logo { margin-bottom:16px; font-size:1.4rem; }
+  .footer-brand p { color:var(--text-secondary); line-height:1.7; font-size:0.9rem; max-width:280px; }
+  .footer-social { display:flex; gap:12px; margin-top:20px; }
+  .social-btn {
+    width:38px; height:38px; border-radius:8px;
+    background:var(--bg-card); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1rem; text-decoration:none; color:var(--text-secondary);
+    transition:border-color 0.3s, color 0.3s;
+  }
+  .social-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .footer-col h4 { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; letter-spacing:1px; margin-bottom:16px; color:var(--text-primary); }
+  .footer-col ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  .footer-col ul a { text-decoration:none; color:var(--text-secondary); font-size:0.9rem; transition:color 0.3s; }
+  .footer-col ul a:hover { color:var(--accent); }
+  .footer-bottom {
+    border-top:1px solid var(--border); padding-top:24px;
+    display:flex; align-items:center; justify-content:space-between;
+    color:var(--text-secondary); font-size:0.85rem; flex-wrap:wrap; gap:12px;
+  }
+  .footer-bottom span { color:var(--accent); }
+
+  /* WHATSAPP FLOAT */
+  .whatsapp-float {
+    position:fixed; bottom:28px; right:28px; z-index:998;
+    width:56px; height:56px; border-radius:50%;
+    background:#25d366; color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.6rem; text-decoration:none;
+    box-shadow:0 4px 20px rgba(37,211,102,0.4);
+    animation:float 3s ease-in-out infinite;
+    transition:transform 0.2s, box-shadow 0.2s;
+  }
+  .whatsapp-float:hover { transform:scale(1.1); box-shadow:0 8px 30px rgba(37,211,102,0.6); }
+
+  /* SCROLL REVEAL */
+  .reveal { opacity:0; transform:translateY(30px); transition:opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+
+  /* MOBILE */
+  @media(max-width:900px) {
+    .nav-links { display:none; }
+    .hamburger { display:flex; }
+    .hero-visual { display:none; }
+    .hero-content { max-width:100%; }
+    .stats { grid-template-columns:repeat(2,1fr); }
+    .contact-wrapper { grid-template-columns:1fr; }
+    .footer-grid { grid-template-columns:1fr 1fr; }
+  }
+  @media(max-width:600px) {
+    .hero h1 { font-size:2.4rem; }
+    .stats { grid-template-columns:1fr 1fr; }
+    .footer-grid { grid-template-columns:1fr; }
+    .form-row { grid-template-columns:1fr; }
+    .warranty-banner { flex-direction:column; }
+  }
+
+  /* MOBILE NAV */
+  .mobile-nav {
+    display:none; position:fixed; top:68px; left:0; right:0; z-index:998;
+    background:rgba(8,12,18,0.98); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border);
+    padding:20px 5%;
+    flex-direction:column; gap:16px;
+  }
+  .mobile-nav.open { display:flex; }
+  .mobile-nav a { text-decoration:none; color:var(--text-secondary); font-size:1rem; font-weight:500; padding:8px 0; border-bottom:1px solid var(--border); }
+  .mobile-nav a:last-child { border-bottom:none; }
+
+  /* SUCCESS MSG */
+  .success-msg {
+    display:none; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3);
+    color:var(--accent); border-radius:8px; padding:14px; text-align:center; margin-top:12px;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">📱</div>
+    JENEXT<span>MOBILE</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#phones">Phones</a></li>
+    <li><a href="#why">Why Us</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="tel:0452266084" class="nav-cta">📞 Call Now</a></li>
+  </ul>
+  <div class="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+  <a href="#home" onclick="toggleMenu()">🏠 Home</a>
+  <a href="#services" onclick="toggleMenu()">🔧 Services</a>
+  <a href="#phones" onclick="toggleMenu()">📱 Phones</a>
+  <a href="#why" onclick="toggleMenu()">⭐ Why Us</a>
+  <a href="#contact" onclick="toggleMenu()">📍 Contact</a>
+  <a href="tel:0452266084" style="color:var(--accent);">📞 0452 266 084</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">📍 Kiriella, Sri Lanka</div>
+    <h1>
+      Your Trusted<br/>
+      <span class="accent">Mobile</span> &amp;<br/>
+      <span class="accent2">Tech</span> Expert
+    </h1>
+    <p>Brand new & used phones with warranty, expert repairs, software solutions, data recovery & accessories. All under one roof.</p>
+    <div class="hero-btns">
+      <a href="#services" class="btn-primary">🔧 Our Services</a>
+      <a href="https://wa.me/94718986024" class="btn-secondary" target="_blank">💬 WhatsApp Us</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="phone-mockup">
+      <div class="phone-screen-content">
+        <div class="phone-icon">📱</div>
+        <div class="phone-text">JENEXT</div>
+      </div>
+      <div class="floating-badge fb1"><span class="fb-dot" style="background:#00d4ff"></span>Brand New Phones</div>
+      <div class="floating-badge fb2"><span class="fb-dot" style="background:#22c55e"></span>3M Warranty</div>
+      <div class="floating-badge fb3"><span class="fb-dot" style="background:#f59e0b"></span>Expert Repairs</div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat-item reveal">
+    <div class="stat-number">500+</div>
+    <div class="stat-label">Repairs Done</div>
+  </div>
+  <div class="stat-item reveal">
+    <div class="stat-number">3M</div>
+    <div class="stat-label">Warranty Period</div>
+  </div>
+  <div class="stat-item reveal">
+    <div class="stat-number">24/7</div>
+    <div class="stat-label">WhatsApp Support</div>
+  </div>
+  <div class="stat-item reveal">
+    <div class="stat-number">100%</div>
+    <div class="stat-label">Customer Satisfaction</div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-header reveal">
+    <div class="section-tag">What We Do</div>
+    <h2 class="section-title">Our <span>Services</span></h2>
+    <p class="section-sub">Professional mobile & laptop repair services with genuine parts and experienced technicians.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <div class="service-icon" style="background:rgba(0,212,255,0.1);">💻</div>
+      <h3>EMMC Repairs</h3>
+      <p>All types of EMMC chip level repairs. Data saved, device restored to full functionality.</p>
+      <span class="service-tag" style="background:rgba(0,212,255,0.1);color:var(--accent);">Chip Level</span>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon" style="background:rgba(124,58,237,0.1);">🖥️</div>
+      <h3>Software Solutions</h3>
+      <p>Flashing, unlocking, custom ROM installation and all software related issues resolved.</p>
+      <span class="service-tag" style="background:rgba(124,58,237,0.1);color:#a78bfa;">Software</span>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon" style="background:rgba(245,158,11,0.1);">💾</div>
+      <h3>Data Recovery</h3>
+      <p>Recover lost contacts, photos, messages and important data from damaged devices.</p>
+      <span class="service-tag" style="background:rgba(245,158,11,0.1);color:var(--accent3);">Data Safe</span>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon" style="background:rgba(34,197,94,0.1);">🔓</div>
+      <h3>Unlock Service</h3>
+      <p>Network unlock, SIM unlock and pattern/password unlock for all mobile brands.</p>
+      <span class="service-tag" style="background:rgba(34,197,94,0.1);color:#4ade80;">Unlock</span>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon" style="background:rgba(239,68,68,0.1);">📲</div>
+      <h3>Display Replacement</h3>
+      <p>Original & compatible display replacement for all phone models. 3 month warranty included.</p>
+      <span class="service-tag" style="background:rgba(239,68,68,0.1);color:#f87171;">3M Warranty</span>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon" style="background:rgba(251,191,36,0.1);">🔋</div>
+      <h3>Battery Replacement</h3>
+      <p>Genuine battery replacements for mobiles and laptops. 3 month warranty on all batteries.</p>
+      <span class="service-tag" style="background:rgba(251,191,36,0.1);color:#fbbf24;">3M Warranty</span>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon" style="background:rgba(99,102,241,0.1);">🔩</div>
+      <h3>Mobile & Laptop Repairs</h3>
+      <p>Any hardware or software repair for all mobile phones and laptops. Experienced technicians.</p>
+      <span class="service-tag" style="background:rgba(99,102,241,0.1);color:#818cf8;">All Brands</span>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon" style="background:rgba(20,184,166,0.1);">📷</div>
+      <h3>CCTV Accessories</h3>
+      <p>CCTV camera accessories and spare parts available. Installation support provided.</p>
+      <span class="service-tag" style="background:rgba(20,184,166,0.1);color:#2dd4bf;">Security</span>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon" style="background:rgba(236,72,153,0.1);">🛒</div>
+      <h3>Spare Parts</h3>
+      <p>Mobile spare parts available in stock. Wide range of genuine and compatible parts.</p>
+      <span class="service-tag" style="background:rgba(236,72,153,0.1);color:#f472b6;">In Stock</span>
+    </div>
+  </div>
+</section>
+
+<!-- WARRANTY BANNER -->
+<div style="padding:0 5% 60px; background:var(--bg-secondary);">
+  <div class="warranty-banner reveal">
+    <div class="warranty-text">
+      <h2>🛡️ <span>Warranty</span> You Can Trust</h2>
+      <p>We stand behind our work. Display and battery replacements come with a 3-month warranty. Terms and conditions apply. Your satisfaction is our priority.</p>
+    </div>
+    <div class="warranty-items">
+      <div class="warranty-item">
+        <div class="w-months">3M</div>
+        <div class="w-label">Display Warranty</div>
+      </div>
+      <div class="warranty-item">
+        <div class="w-months">3M</div>
+        <div class="w-label">Battery Warranty</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHONES -->
+<section id="phones">
+  <div class="section-header reveal">
+    <div class="section-tag">Buy Now</div>
+    <h2 class="section-title">Available <span>Phones</span></h2>
+    <p class="section-sub">Brand new and used phones with warranty. All verified and quality checked.</p>
+  </div>
+  <div class="phones-grid">
+    <div class="phone-card reveal">
+      <div class="phone-card-img">
+        📱
+        <span class="phone-condition new-badge">Brand New</span>
+      </div>
+      <div class="phone-card-body">
+        <h3>Samsung Galaxy A55</h3>
+        <div class="brand">Samsung • 128GB</div>
+        <div class="price">රු 85,000</div>
+        <div class="warranty">✅ 1 Year Warranty</div>
+        <a href="https://wa.me/94718986024?text=I'm interested in Samsung Galaxy A55" class="inquiry-btn" target="_blank">💬 Inquire Now</a>
+      </div>
+    </div>
+    <div class="phone-card reveal">
+      <div class="phone-card-img">
+        📱
+        <span class="phone-condition new-badge">Brand New</span>
+      </div>
+      <div class="phone-card-body">
+        <h3>iPhone 15</h3>
+        <div class="brand">Apple • 128GB</div>
+        <div class="price">රු 195,000</div>
+        <div class="warranty">✅ 1 Year Warranty</div>
+        <a href="https://wa.me/94718986024?text=I'm interested in iPhone 15" class="inquiry-btn" target="_blank">💬 Inquire Now</a>
+      </div>
+    </div>
+    <div class="phone-card reveal">
+      <div class="phone-card-img">
+        📱
+        <span class="phone-condition used-badge">Used</span>
+      </div>
+      <div class="phone-card-body">
+        <h3>Samsung S23</h3>
+        <div class="brand">Samsung • 256GB</div>
+        <div class="price">රු 95,000</div>
+        <div class="warranty">✅ 3 Month Warranty</div>
+        <a href="https://wa.me/94718986024?text=I'm interested in Samsung S23" class="inquiry-btn" target="_blank">💬 Inquire Now</a>
+      </div>
+    </div>
+    <div class="phone-card reveal">
+      <div class="phone-card-img">
+        📱
+        <span class="phone-condition new-badge">Brand New</span>
+      </div>
+      <div class="phone-card-body">
+        <h3>Redmi Note 13</h3>
+        <div class="brand">Xiaomi • 128GB</div>
+        <div class="price">රු 45,000</div>
+        <div class="warranty">✅ 1 Year Warranty</div>
+        <a href="https://wa.me/94718986024?text=I'm interested in Redmi Note 13" class="inquiry-btn" target="_blank">💬 Inquire Now</a>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center; margin-top:36px;">
+    <a href="https://wa.me/94718986024?text=Please send me the full phone list" class="btn-primary" target="_blank">📋 View All Phones on WhatsApp</a>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section id="why" style="background:var(--bg-secondary);">
+  <div class="section-header reveal">
+    <div class="section-tag">Why Choose Us</div>
+    <h2 class="section-title">Why <span>Jenext?</span></h2>
+    <p class="section-sub">We bring quality, trust and expertise to every repair and sale.</p>
+  </div>
+  <div class="why-grid">
+    <div class="why-card reveal">
+      <div class="why-icon">👨‍🔧</div>
+      <h3>Expert Technicians</h3>
+      <p>Experienced professionals handling every repair with care and precision.</p>
+    </div>
+    <div class="why-card reveal">
+      <div class="why-icon">⚡</div>
+      <h3>Fast Service</h3>
+      <p>Most repairs done same day. We value your time as much as you do.</p>
+    </div>
+    <div class="why-card reveal">
+      <div class="why-icon">🛡️</div>
+      <h3>Genuine Parts</h3>
+      <p>Only genuine or top-quality compatible parts used in all our repairs.</p>
+    </div>
+    <div class="why-card reveal">
+      <div class="why-icon">💰</div>
+      <h3>Best Prices</h3>
+      <p>Competitive pricing with no hidden charges. Transparent quotes upfront.</p>
+    </div>
+    <div class="why-card reveal">
+      <div class="why-icon">📞</div>
+      <h3>24/7 WhatsApp</h3>
+      <p>Reach us anytime on WhatsApp for queries, bookings and support.</p>
+    </div>
+    <div class="why-card reveal">
+      <div class="why-icon">🏆</div>
+      <h3>Trusted by Locals</h3>
+      <p>Serving the Kiriella community with trust and excellence for years.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-header reveal">
+    <div class="section-tag">Get In Touch</div>
+    <h2 class="section-title">Contact <span>Us</span></h2>
+    <p class="section-sub">Visit us, call us or send a message. We're always ready to help you.</p>
+  </div>
+  <div class="contact-wrapper">
+    <div class="contact-info reveal">
+      <h2>Let's <span>Talk</span></h2>
+      <p>Whether you need a repair, want to buy a phone, or just have a question — we're here for you. Reach out anytime!</p>
+      <div class="contact-items">
+        <div class="contact-item">
+          <div class="contact-item-icon" style="background:rgba(0,212,255,0.1);">📞</div>
+          <div class="contact-item-text">
+            <div class="label">Hotline</div>
+            <div class="value"><a href="tel:0452266084">0452 266 084</a></div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-icon" style="background:rgba(37,211,102,0.1);">💬</div>
+          <div class="contact-item-text">
+            <div class="label">WhatsApp</div>
+            <div class="value"><a href="https://wa.me/94718986024" target="_blank">0718 986 024</a></div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-icon" style="background:rgba(245,158,11,0.1);">📍</div>
+          <div class="contact-item-text">
+            <div class="label">Location</div>
+            <div class="value">24/A Hindurangala, Kiriella</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-icon" style="background:rgba(124,58,237,0.1);">🕐</div>
+          <div class="contact-item-text">
+            <div class="label">Working Hours</div>
+            <div class="value">Mon – Sun: 8:00 AM – 8:00 PM</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-container" style="margin-top:24px;">
+        <div class="map-placeholder">
+          <div class="map-icon">📍</div>
+          <p>Jenext Mobile</p>
+          <strong>24/A Hindurangala, Kiriella</strong>
+          <br/><br/>
+          <a href="https://maps.google.com/?q=Kiriella,Sri+Lanka" target="_blank" class="btn-primary" style="font-size:0.85rem; padding:10px 20px; display:inline-block; margin-top:8px;">🗺️ Open in Google Maps</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-form reveal">
+      <h3>📩 Send a Message</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" id="name" placeholder="John Silva"/>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="phone" placeholder="07X XXX XXXX"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Service Needed</label>
+        <select id="service">
+          <option value="">Select a service...</option>
+          <option>Buy a Phone</option>
+          <option>Display Replacement</option>
+          <option>Battery Replacement</option>
+          <option>EMMC Repair</option>
+          <option>Software Solution</option>
+          <option>Data Recovery</option>
+          <option>Unlock Service</option>
+          <option>Laptop Repair</option>
+          <option>CCTV Accessories</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <textarea id="message" placeholder="Describe your issue or inquiry..."></textarea>
+      </div>
+      <button class="submit-btn" onclick="sendWhatsApp()">📱 Send via WhatsApp</button>
+      <div class="success-msg" id="successMsg">✅ Redirecting to WhatsApp...</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo"><div class="logo-icon">📱</div> JENEXT<span>MOBILE</span></div>
+      <p>Your trusted mobile phone shop in Kiriella. Selling, repairing & accessories — we do it all with a smile.</p>
+      <div class="footer-social">
+        <a class="social-btn" href="https://wa.me/94718986024" target="_blank">💬</a>
+        <a class="social-btn" href="tel:0452266084">📞</a>
+        <a class="social-btn" href="https://maps.google.com/?q=Kiriella" target="_blank">📍</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#services">EMMC Repair</a></li>
+        <li><a href="#services">Display Replacement</a></li>
+        <li><a href="#services">Battery Replacement</a></li>
+        <li><a href="#services">Data Recovery</a></li>
+        <li><a href="#services">Unlock Service</a></li>
+        <li><a href="#services">Software Solutions</a></li>
+        <li><a href="#services">CCTV Accessories</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#phones">Buy Phones</a></li>
+        <li><a href="#why">Why Choose Us</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="https://wa.me/94718986024" target="_blank">WhatsApp Us</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2024 <span>Jenext Mobile</span>. All rights reserved. | 24/A Hindurangala, Kiriella</div>
+    <div>Made with ❤️ for Kiriella</div>
+  </div>
+</footer>
+
+<!-- WHATSAPP FLOAT -->
+<a class="whatsapp-float" href="https://wa.me/94718986024" target="_blank" title="Chat on WhatsApp">💬</a>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if(entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Mobile menu
+  function toggleMenu() {
+    document.getElementById('mobileNav').classList.toggle('open');
+  }
+
+  // WhatsApp form
+  function sendWhatsApp() {
+    const name = document.getElementById('name').value || 'Customer';
+    const phone = document.getElementById('phone').value || 'Not provided';
+    const service = document.getElementById('service').value || 'General Inquiry';
+    const message = document.getElementById('message').value || '';
+    const text = `Hello Jenext Mobile!%0A%0AName: ${name}%0APhone: ${phone}%0AService: ${service}%0AMessage: ${message}`;
+    document.getElementById('successMsg').style.display = 'block';
+    setTimeout(() => { window.open(`https://wa.me/94718986024?text=${text}`, '_blank'); }, 800);
+  }
+
+  // Nav active state
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    nav.style.background = window.scrollY > 50 ? 'rgba(8,12,18,0.98)' : 'rgba(8,12,18,0.85)';
+  });
+</script>
+</body>
+</html>

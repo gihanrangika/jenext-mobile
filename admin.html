@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jenext Mobile - Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #080c12; --sidebar: #0d1421; --card: #111827;
+    --accent: #00d4ff; --accent2: #7c3aed; --accent3: #f59e0b;
+    --green: #22c55e; --red: #ef4444; --orange: #f97316;
+    --text: #f0f4ff; --muted: #8899bb; --border: #1e2d47;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Exo 2',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+  /* LOGIN */
+  #loginScreen {
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(ellipse at 50% 50%, rgba(0,212,255,0.05), transparent 70%);
+  }
+  .login-box {
+    background:var(--card); border:1px solid var(--border); border-radius:20px;
+    padding:48px; width:100%; max-width:400px; text-align:center;
+  }
+  .login-logo { font-family:'Rajdhani',sans-serif; font-size:2rem; font-weight:700; margin-bottom:8px; }
+  .login-logo span { color:var(--accent); }
+  .login-sub { color:var(--muted); font-size:0.85rem; margin-bottom:32px; }
+  .login-box input {
+    width:100%; padding:12px 16px; margin-bottom:14px;
+    background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    border-radius:8px; color:var(--text); font-family:'Exo 2',sans-serif; font-size:0.95rem;
+    outline:none; transition:border-color 0.3s;
+  }
+  .login-box input:focus { border-color:var(--accent); }
+  .login-btn {
+    width:100%; padding:13px; background:linear-gradient(135deg,var(--accent),#0099cc);
+    color:#000; border:none; border-radius:8px; font-family:'Exo 2',sans-serif;
+    font-size:1rem; font-weight:700; cursor:pointer; letter-spacing:1px;
+  }
+  .login-error { color:var(--red); font-size:0.85rem; margin-top:12px; display:none; }
+
+  /* LAYOUT */
+  #adminApp { display:none; min-height:100vh; }
+  .layout { display:flex; min-height:100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width:240px; background:var(--sidebar); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; z-index:100;
+  }
+  .sidebar-logo {
+    padding:20px; border-bottom:1px solid var(--border);
+    font-family:'Rajdhani',sans-serif; font-size:1.3rem; font-weight:700; letter-spacing:1px;
+  }
+  .sidebar-logo span { color:var(--accent); }
+  .sidebar-logo small { display:block; color:var(--muted); font-size:0.7rem; font-weight:400; letter-spacing:2px; text-transform:uppercase; }
+  .sidebar-nav { flex:1; padding:16px 0; }
+  .nav-item {
+    display:flex; align-items:center; gap:12px;
+    padding:12px 20px; color:var(--muted); cursor:pointer;
+    transition:color 0.2s, background 0.2s;
+    font-size:0.9rem; font-weight:500; letter-spacing:0.5px;
+    border-left:3px solid transparent;
+  }
+  .nav-item:hover { color:var(--text); background:rgba(255,255,255,0.04); }
+  .nav-item.active { color:var(--accent); background:rgba(0,212,255,0.07); border-left-color:var(--accent); }
+  .nav-item .nav-icon { font-size:1.1rem; width:20px; text-align:center; }
+  .sidebar-footer { padding:16px 20px; border-top:1px solid var(--border); }
+  .logout-btn {
+    width:100%; padding:10px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3);
+    color:var(--red); border-radius:8px; cursor:pointer; font-family:'Exo 2',sans-serif;
+    font-size:0.9rem; font-weight:600; transition:background 0.2s;
+  }
+  .logout-btn:hover { background:rgba(239,68,68,0.2); }
+
+  /* MAIN */
+  .main { margin-left:240px; flex:1; padding:28px; }
+  .page { display:none; }
+  .page.active { display:block; }
+  .page-title { font-family:'Rajdhani',sans-serif; font-size:1.8rem; font-weight:700; margin-bottom:6px; }
+  .page-sub { color:var(--muted); font-size:0.9rem; margin-bottom:28px; }
+
+  /* STAT CARDS */
+  .stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; margin-bottom:32px; }
+  .stat-card {
+    background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px;
+    transition:border-color 0.3s, transform 0.2s;
+  }
+  .stat-card:hover { border-color:rgba(0,212,255,0.3); transform:translateY(-2px); }
+  .stat-num { font-family:'Rajdhani',sans-serif; font-size:2.2rem; font-weight:700; color:var(--accent); }
+  .stat-lbl { color:var(--muted); font-size:0.8rem; margin-top:2px; letter-spacing:1px; }
+  .stat-icon { font-size:1.5rem; margin-bottom:8px; }
+
+  /* TABLE */
+  .table-wrap { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+  .table-header {
+    padding:16px 20px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  }
+  .table-title { font-family:'Rajdhani',sans-serif; font-size:1.1rem; font-weight:700; }
+  .add-btn {
+    padding:8px 18px; background:linear-gradient(135deg,var(--accent),#0099cc);
+    color:#000; border:none; border-radius:8px; cursor:pointer;
+    font-family:'Exo 2',sans-serif; font-size:0.85rem; font-weight:700; letter-spacing:1px;
+  }
+  table { width:100%; border-collapse:collapse; }
+  th { padding:12px 16px; text-align:left; font-size:0.75rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; border-bottom:1px solid var(--border); background:rgba(255,255,255,0.02); }
+  td { padding:14px 16px; font-size:0.9rem; border-bottom:1px solid rgba(30,45,71,0.5); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+
+  /* BADGES */
+  .badge {
+    display:inline-block; padding:3px 10px; border-radius:100px;
+    font-size:0.75rem; font-weight:700; letter-spacing:0.5px;
+  }
+  .badge-new { background:rgba(0,212,255,0.15); color:var(--accent); border:1px solid rgba(0,212,255,0.3); }
+  .badge-used { background:rgba(245,158,11,0.15); color:var(--accent3); border:1px solid rgba(245,158,11,0.3); }
+  .badge-pending { background:rgba(245,158,11,0.15); color:var(--accent3); border:1px solid rgba(245,158,11,0.3); }
+  .badge-resolved { background:rgba(34,197,94,0.15); color:var(--green); border:1px solid rgba(34,197,94,0.3); }
+  .badge-progress { background:rgba(0,212,255,0.15); color:var(--accent); border:1px solid rgba(0,212,255,0.3); }
+  .badge-completed { background:rgba(34,197,94,0.15); color:var(--green); }
+
+  /* ACTION BTNS */
+  .action-btns { display:flex; gap:8px; }
+  .edit-btn {
+    padding:5px 12px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3);
+    color:var(--accent); border-radius:6px; cursor:pointer; font-size:0.8rem; font-weight:600;
+    transition:background 0.2s;
+  }
+  .edit-btn:hover { background:rgba(0,212,255,0.2); }
+  .del-btn {
+    padding:5px 12px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3);
+    color:var(--red); border-radius:6px; cursor:pointer; font-size:0.8rem; font-weight:600;
+    transition:background 0.2s;
+  }
+  .del-btn:hover { background:rgba(239,68,68,0.2); }
+
+  /* MODAL */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7);
+    z-index:500; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:32px; width:100%; max-width:520px; max-height:90vh; overflow-y:auto;
+  }
+  .modal h3 { font-family:'Rajdhani',sans-serif; font-size:1.4rem; font-weight:700; margin-bottom:20px; }
+  .form-group { margin-bottom:14px; }
+  .form-group label { display:block; font-size:0.8rem; color:var(--muted); margin-bottom:6px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width:100%; padding:10px 14px;
+    background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    border-radius:8px; color:var(--text); font-family:'Exo 2',sans-serif; font-size:0.9rem;
+    outline:none; transition:border-color 0.3s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--accent); }
+  .form-group select option { background:var(--card); }
+  .form-group textarea { height:80px; resize:vertical; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .modal-btns { display:flex; gap:12px; margin-top:20px; justify-content:flex-end; }
+  .cancel-btn {
+    padding:10px 20px; background:transparent; border:1px solid var(--border);
+    color:var(--muted); border-radius:8px; cursor:pointer; font-family:'Exo 2',sans-serif; font-size:0.9rem;
+  }
+  .save-btn {
+    padding:10px 24px; background:linear-gradient(135deg,var(--accent),#0099cc);
+    color:#000; border:none; border-radius:8px; cursor:pointer;
+    font-family:'Exo 2',sans-serif; font-size:0.9rem; font-weight:700;
+  }
+
+  /* EMPTY STATE */
+  .empty { text-align:center; padding:48px; color:var(--muted); }
+  .empty .empty-icon { font-size:3rem; margin-bottom:12px; }
+
+  /* TOAST */
+  .toast {
+    position:fixed; bottom:24px; right:24px; z-index:9999;
+    background:var(--card); border:1px solid var(--accent); border-radius:10px;
+    padding:12px 20px; color:var(--accent); font-size:0.9rem; font-weight:600;
+    transform:translateY(80px); opacity:0; transition:all 0.3s;
+  }
+  .toast.show { transform:translateY(0); opacity:1; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">JENEXT<span>MOBILE</span></div>
+    <div class="login-sub">🔐 Admin Panel</div>
+    <input type="text" id="loginUser" placeholder="Username" value="admin"/>
+    <input type="password" id="loginPass" placeholder="Password"/>
+    <button class="login-btn" onclick="doLogin()">Login →</button>
+    <div class="login-error" id="loginError">❌ Invalid credentials</div>
+    <div style="margin-top:16px;color:var(--muted);font-size:0.8rem;">Demo: admin / jenext2024</div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp">
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        📱 JENEXT<span>MOBILE</span>
+        <small>Admin Panel</small>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
+        <div class="nav-item" onclick="showPage('phones')"><span class="nav-icon">📱</span> Phones</div>
+        <div class="nav-item" onclick="showPage('inquiries')"><span class="nav-icon">💬</span> Inquiries</div>
+        <div class="nav-item" onclick="showPage('repairs')"><span class="nav-icon">🔧</span> Repairs</div>
+      </nav>
+      <div class="sidebar-footer">
+        <div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Logged in as <span style="color:var(--accent)" id="adminName">Admin</span></div>
+        <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-title">📊 Dashboard</div>
+        <div class="page-sub">Welcome back! Here's your shop overview.</div>
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-card"><div class="stat-icon">📱</div><div class="stat-num" id="s-phones">—</div><div class="stat-lbl">Total Phones</div></div>
+          <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-num" id="s-stock">—</div><div class="stat-lbl">In Stock</div></div>
+          <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-num" id="s-inquiries">—</div><div class="stat-lbl">Inquiries</div></div>
+          <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-num" id="s-pending">—</div><div class="stat-lbl">Pending Inquiries</div></div>
+          <div class="stat-card"><div class="stat-icon">🔧</div><div class="stat-num" id="s-repairs">—</div><div class="stat-lbl">Total Repairs</div></div>
+          <div class="stat-card"><div class="stat-icon">⚡</div><div class="stat-num" id="s-active">—</div><div class="stat-lbl">Active Repairs</div></div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">⏳ Recent Inquiries</div></div>
+          <div id="recentInquiries"></div>
+        </div>
+      </div>
+
+      <!-- PHONES -->
+      <div class="page" id="page-phones">
+        <div class="page-title">📱 Phone Inventory</div>
+        <div class="page-sub">Manage your phones for sale.</div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <div class="table-title">All Phones</div>
+            <button class="add-btn" onclick="openPhoneModal()">+ Add Phone</button>
+          </div>
+          <div id="phonesTable"></div>
+        </div>
+      </div>
+
+      <!-- INQUIRIES -->
+      <div class="page" id="page-inquiries">
+        <div class="page-title">💬 Customer Inquiries</div>
+        <div class="page-sub">View and manage customer inquiries.</div>
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">All Inquiries</div></div>
+          <div id="inquiriesTable"></div>
+        </div>
+      </div>
+
+      <!-- REPAIRS -->
+      <div class="page" id="page-repairs">
+        <div class="page-title">🔧 Repair Jobs</div>
+        <div class="page-sub">Track all repair jobs.</div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <div class="table-title">Repair Tracker</div>
+            <button class="add-btn" onclick="openRepairModal()">+ Add Repair</button>
+          </div>
+          <div id="repairsTable"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- PHONE MODAL -->
+<div class="modal-overlay" id="phoneModal">
+  <div class="modal">
+    <h3 id="phoneModalTitle">📱 Add Phone</h3>
+    <input type="hidden" id="phoneId"/>
+    <div class="form-row">
+      <div class="form-group"><label>Phone Name *</label><input id="phoneName" placeholder="Samsung Galaxy A55"/></div>
+      <div class="form-group"><label>Brand</label><input id="phoneBrand" placeholder="Samsung"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Storage</label><input id="phoneStorage" placeholder="128GB"/></div>
+      <div class="form-group"><label>Condition</label>
+        <select id="phoneCondition"><option value="new">Brand New</option><option value="used">Used</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Price (Rs.) *</label><input id="phonePrice" type="number" placeholder="85000"/></div>
+      <div class="form-group"><label>Stock</label><input id="phoneStock" type="number" placeholder="1" value="1"/></div>
+    </div>
+    <div class="form-group"><label>Warranty</label><input id="phoneWarranty" placeholder="1 Year / 3 Months"/></div>
+    <div class="form-group"><label>Description</label><textarea id="phoneDesc" placeholder="Short description..."></textarea></div>
+    <div class="form-group">
+      <label><input type="checkbox" id="phoneFeatured" style="width:auto;margin-right:8px;"/> Show as Featured on Website</label>
+    </div>
+    <div class="modal-btns">
+      <button class="cancel-btn" onclick="closeModal('phoneModal')">Cancel</button>
+      <button class="save-btn" onclick="savePhone()">💾 Save Phone</button>
+    </div>
+  </div>
+</div>
+
+<!-- REPAIR MODAL -->
+<div class="modal-overlay" id="repairModal">
+  <div class="modal">
+    <h3 id="repairModalTitle">🔧 Add Repair Job</h3>
+    <input type="hidden" id="repairId"/>
+    <div class="form-row">
+      <div class="form-group"><label>Customer Name *</label><input id="repairCustomer" placeholder="Kamal Perera"/></div>
+      <div class="form-group"><label>Phone Number</label><input id="repairPhone" placeholder="077 XXX XXXX"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Device Type</label>
+        <select id="repairDevice"><option>Mobile</option><option>Laptop</option><option>Other</option></select>
+      </div>
+      <div class="form-group"><label>Device Model</label><input id="repairModel" placeholder="Samsung A32"/></div>
+    </div>
+    <div class="form-group"><label>Issue</label><textarea id="repairIssue" placeholder="Describe the problem..."></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>Estimated Cost (Rs.)</label><input id="repairCost" type="number" placeholder="3500"/></div>
+      <div class="form-group"><label>Status</label>
+        <select id="repairStatus"><option value="pending">Pending</option><option value="in-progress">In Progress</option><option value="completed">Completed</option></select>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="cancel-btn" onclick="closeModal('repairModal')">Cancel</button>
+      <button class="save-btn" onclick="saveRepair()">💾 Save Job</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ========================
+// STATE
+// ========================
+let token = localStorage.getItem('jenext_token') || '';
+let adminInfo = JSON.parse(localStorage.getItem('jenext_admin') || '{}');
+const API = 'http://localhost:3001/api'; // Change to your server URL
+
+// For demo (without backend), we use local data
+let localData = {
+  phones: [
+    { id:1, name:'Samsung Galaxy A55', brand:'Samsung', storage:'128GB', condition:'new', price:85000, warranty:'1 Year', stock:3, featured:true, description:'Brand new sealed box' },
+    { id:2, name:'iPhone 15', brand:'Apple', storage:'128GB', condition:'new', price:195000, warranty:'1 Year', stock:2, featured:true, description:'Brand new with box' },
+    { id:3, name:'Samsung S23', brand:'Samsung', storage:'256GB', condition:'used', price:95000, warranty:'3 Months', stock:1, featured:false, description:'Excellent condition' },
+    { id:4, name:'Redmi Note 13', brand:'Xiaomi', storage:'128GB', condition:'new', price:45000, warranty:'1 Year', stock:5, featured:true, description:'Brand new' },
+  ],
+  inquiries: [
+    { id:1, name:'Kamal Perera', phone:'0771234567', service:'Display Replacement', message:'Screen cracked', status:'pending', createdAt:'2024-11-01' },
+    { id:2, name:'Nimal Silva', phone:'0712345678', service:'Buy a Phone', message:'Looking for Samsung under 80k', status:'resolved', createdAt:'2024-11-02' },
+  ],
+  repairs: [
+    { id:1, customerName:'Kamal Perera', customerPhone:'0771234567', deviceType:'Mobile', deviceModel:'Samsung A32', issue:'Display broken', status:'in-progress', estimatedCost:4500, createdAt:'2024-11-01' },
+    { id:2, customerName:'Saman Kumara', customerPhone:'0757654321', deviceType:'Laptop', deviceModel:'Dell Inspiron', issue:'Not charging', status:'pending', estimatedCost:3500, createdAt:'2024-11-03' },
+  ],
+  nextId: { phones:5, inquiries:3, repairs:3 }
+};
+
+// ========================
+// LOGIN (Demo mode - no backend needed)
+// ========================
+function doLogin() {
+  const u = document.getElementById('loginUser').value;
+  const p = document.getElementById('loginPass').value;
+  if (u === 'admin' && p === 'jenext2024') {
+    token = 'demo_token';
+    adminInfo = { name: 'Jenext Admin' };
+    localStorage.setItem('jenext_token', token);
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'block';
+    document.getElementById('adminName').textContent = adminInfo.name;
+    loadDashboard();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem('jenext_token');
+  token = '';
+  document.getElementById('adminApp').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+// Auto login if token exists
+if (token) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'block';
+  document.getElementById('adminName').textContent = 'Jenext Admin';
+  loadDashboard();
+}
+
+// ========================
+// NAVIGATION
+// ========================
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (page === 'dashboard') loadDashboard();
+  if (page === 'phones') renderPhones();
+  if (page === 'inquiries') renderInquiries();
+  if (page === 'repairs') renderRepairs();
+}
+
+// ========================
+// DASHBOARD
+// ========================
+function loadDashboard() {
+  const d = localData;
+  document.getElementById('s-phones').textContent = d.phones.length;
+  document.getElementById('s-stock').textContent = d.phones.reduce((s,p) => s+p.stock, 0);
+  document.getElementById('s-inquiries').textContent = d.inquiries.length;
+  document.getElementById('s-pending').textContent = d.inquiries.filter(i => i.status==='pending').length;
+  document.getElementById('s-repairs').textContent = d.repairs.length;
+  document.getElementById('s-active').textContent = d.repairs.filter(r => r.status==='in-progress').length;
+
+  // Recent inquiries
+  const recent = d.inquiries.slice(0,5);
+  document.getElementById('recentInquiries').innerHTML = recent.length ? `
+    <table><thead><tr><th>Name</th><th>Phone</th><th>Service</th><th>Status</th><th>Date</th></tr></thead>
+    <tbody>${recent.map(i => `<tr>
+      <td>${i.name}</td><td>${i.phone}</td><td>${i.service}</td>
+      <td><span class="badge badge-${i.status}">${i.status}</span></td>
+      <td>${i.createdAt?.split('T')[0]||''}</td>
+    </tr>`).join('')}</tbody></table>` : '<div class="empty"><div class="empty-icon">💬</div>No inquiries yet.</div>';
+}
+
+// ========================
+// PHONES
+// ========================
+function renderPhones() {
+  const phones = localData.phones;
+  document.getElementById('phonesTable').innerHTML = phones.length ? `
+    <table><thead><tr><th>Name</th><th>Brand</th><th>Condition</th><th>Price</th><th>Stock</th><th>Featured</th><th>Actions</th></tr></thead>
+    <tbody>${phones.map(p => `<tr>
+      <td><strong>${p.name}</strong><br/><small style="color:var(--muted)">${p.storage||''}</small></td>
+      <td>${p.brand||'-'}</td>
+      <td><span class="badge badge-${p.condition}">${p.condition==='new'?'Brand New':'Used'}</span></td>
+      <td style="color:var(--accent);font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700">Rs. ${p.price?.toLocaleString()}</td>
+      <td>${p.stock}</td>
+      <td>${p.featured ? '✅' : '—'}</td>
+      <td><div class="action-btns">
+        <button class="edit-btn" onclick="openPhoneModal(${p.id})">✏️ Edit</button>
+        <button class="del-btn" onclick="deletePhone(${p.id})">🗑️ Del</button>
+      </div></td>
+    </tr>`).join('')}</tbody></table>` : '<div class="empty"><div class="empty-icon">📱</div>No phones added yet.</div>';
+}
+
+function openPhoneModal(id) {
+  const modal = document.getElementById('phoneModal');
+  if (id) {
+    const p = localData.phones.find(x => x.id === id);
+    document.getElementById('phoneModalTitle').textContent = '✏️ Edit Phone';
+    document.getElementById('phoneId').value = id;
+    document.getElementById('phoneName').value = p.name;
+    document.getElementById('phoneBrand').value = p.brand || '';
+    document.getElementById('phoneStorage').value = p.storage || '';
+    document.getElementById('phoneCondition').value = p.condition;
+    document.getElementById('phonePrice').value = p.price;
+    document.getElementById('phoneStock').value = p.stock;
+    document.getElementById('phoneWarranty').value = p.warranty || '';
+    document.getElementById('phoneDesc').value = p.description || '';
+    document.getElementById('phoneFeatured').checked = !!p.featured;
+  } else {
+    document.getElementById('phoneModalTitle').textContent = '📱 Add Phone';
+    document.getElementById('phoneId').value = '';
+    ['phoneName','phoneBrand','phoneStorage','phonePrice','phoneWarranty','phoneDesc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('phoneStock').value = 1;
+    document.getElementById('phoneCondition').value = 'new';
+    document.getElementById('phoneFeatured').checked = false;
+  }
+  modal.classList.add('open');
+}
+
+function savePhone() {
+  const id = document.getElementById('phoneId').value;
+  const phone = {
+    name: document.getElementById('phoneName').value,
+    brand: document.getElementById('phoneBrand').value,
+    storage: document.getElementById('phoneStorage').value,
+    condition: document.getElementById('phoneCondition').value,
+    price: parseInt(document.getElementById('phonePrice').value),
+    stock: parseInt(document.getElementById('phoneStock').value) || 1,
+    warranty: document.getElementById('phoneWarranty').value,
+    description: document.getElementById('phoneDesc').value,
+    featured: document.getElementById('phoneFeatured').checked,
+  };
+  if (!phone.name || !phone.price) { showToast('❌ Name and price required!'); return; }
+  if (id) {
+    const idx = localData.phones.findIndex(p => p.id === parseInt(id));
+    localData.phones[idx] = { ...localData.phones[idx], ...phone };
+    showToast('✅ Phone updated!');
+  } else {
+    localData.phones.unshift({ id: localData.nextId.phones++, ...phone });
+    showToast('✅ Phone added!');
+  }
+  closeModal('phoneModal');
+  renderPhones();
+}
+
+function deletePhone(id) {
+  if (!confirm('Delete this phone?')) return;
+  localData.phones = localData.phones.filter(p => p.id !== id);
+  renderPhones();
+  showToast('🗑️ Phone deleted!');
+}
+
+// ========================
+// INQUIRIES
+// ========================
+function renderInquiries() {
+  const inq = localData.inquiries;
+  document.getElementById('inquiriesTable').innerHTML = inq.length ? `
+    <table><thead><tr><th>Name</th><th>Phone</th><th>Service</th><th>Message</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+    <tbody>${inq.map(i => `<tr>
+      <td>${i.name}</td><td>${i.phone}</td><td>${i.service}</td>
+      <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">${i.message||'-'}</td>
+      <td><span class="badge badge-${i.status}">${i.status}</span></td>
+      <td>${i.createdAt?.split('T')[0]||''}</td>
+      <td><button class="edit-btn" onclick="toggleInquiry(${i.id})">${i.status==='pending'?'✅ Resolve':'🔄 Reopen'}</button></td>
+    </tr>`).join('')}</tbody></table>` : '<div class="empty"><div class="empty-icon">💬</div>No inquiries.</div>';
+}
+
+function toggleInquiry(id) {
+  const i = localData.inquiries.find(x => x.id === id);
+  i.status = i.status === 'pending' ? 'resolved' : 'pending';
+  renderInquiries();
+  showToast('✅ Inquiry updated!');
+}
+
+// ========================
+// REPAIRS
+// ========================
+function renderRepairs() {
+  const repairs = localData.repairs;
+  document.getElementById('repairsTable').innerHTML = repairs.length ? `
+    <table><thead><tr><th>Customer</th><th>Device</th><th>Issue</th><th>Est. Cost</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+    <tbody>${repairs.map(r => `<tr>
+      <td><strong>${r.customerName}</strong><br/><small style="color:var(--muted)">${r.customerPhone||''}</small></td>
+      <td>${r.deviceType} - ${r.deviceModel}</td>
+      <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">${r.issue||'-'}</td>
+      <td style="color:var(--accent3);font-family:'Rajdhani',sans-serif;font-weight:700">Rs. ${r.estimatedCost?.toLocaleString()||'-'}</td>
+      <td><span class="badge badge-${r.status==='in-progress'?'progress':r.status}">${r.status}</span></td>
+      <td>${r.createdAt?.split('T')[0]||''}</td>
+      <td><div class="action-btns">
+        <button class="edit-btn" onclick="openRepairModal(${r.id})">✏️</button>
+        <button class="del-btn" onclick="deleteRepair(${r.id})">🗑️</button>
+      </div></td>
+    </tr>`).join('')}</tbody></table>` : '<div class="empty"><div class="empty-icon">🔧</div>No repair jobs.</div>';
+}
+
+function openRepairModal(id) {
+  const modal = document.getElementById('repairModal');
+  if (id) {
+    const r = localData.repairs.find(x => x.id === id);
+    document.getElementById('repairModalTitle').textContent = '✏️ Edit Repair Job';
+    document.getElementById('repairId').value = id;
+    document.getElementById('repairCustomer').value = r.customerName;
+    document.getElementById('repairPhone').value = r.customerPhone || '';
+    document.getElementById('repairDevice').value = r.deviceType;
+    document.getElementById('repairModel').value = r.deviceModel;
+    document.getElementById('repairIssue').value = r.issue || '';
+    document.getElementById('repairCost').value = r.estimatedCost || '';
+    document.getElementById('repairStatus').value = r.status;
+  } else {
+    document.getElementById('repairModalTitle').textContent = '🔧 Add Repair Job';
+    document.getElementById('repairId').value = '';
+    ['repairCustomer','repairPhone','repairModel','repairIssue','repairCost'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('repairStatus').value = 'pending';
+  }
+  modal.classList.add('open');
+}
+
+function saveRepair() {
+  const id = document.getElementById('repairId').value;
+  const repair = {
+    customerName: document.getElementById('repairCustomer').value,
+    customerPhone: document.getElementById('repairPhone').value,
+    deviceType: document.getElementById('repairDevice').value,
+    deviceModel: document.getElementById('repairModel').value,
+    issue: document.getElementById('repairIssue').value,
+    estimatedCost: parseInt(document.getElementById('repairCost').value) || 0,
+    status: document.getElementById('repairStatus').value,
+  };
+  if (!repair.customerName) { showToast('❌ Customer name required!'); return; }
+  if (id) {
+    const idx = localData.repairs.findIndex(r => r.id === parseInt(id));
+    localData.repairs[idx] = { ...localData.repairs[idx], ...repair };
+    showToast('✅ Repair updated!');
+  } else {
+    localData.repairs.unshift({ id: localData.nextId.repairs++, ...repair, createdAt: new Date().toISOString() });
+    showToast('✅ Repair job added!');
+  }
+  closeModal('repairModal');
+  renderRepairs();
+}
+
+function deleteRepair(id) {
+  if (!confirm('Delete this repair job?')) return;
+  localData.repairs = localData.repairs.filter(r => r.id !== id);
+  renderRepairs();
+  showToast('🗑️ Deleted!');
+}
+
+// ========================
+// UTILS
+// ========================
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) { if(e.target === this) this.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
